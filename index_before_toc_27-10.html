@@ -1,0 +1,807 @@
+<title>Вожовы, Кольцовы, Смолины</title>
+<style>
+:root{color-scheme:light;
+  --bg:#f2efe9; --card:#fff; --ink:#17140f; --line:#e6e0d6;
+  --accent:#d9541f; --muted:#7d746a;
+  --k:#c2703a; --s:#4a7c59; --g:#3f6d8f; --n:#8a5a8f;
+  --q:#e0a800; --qbg:#fff8e1; --qline:#f0d98a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+
+/* ── ШАПКА ── */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:60;background:rgba(242,239,233,.94);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1180px;margin:0 auto;padding:12px 26px 11px}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.brand h1{font-size:21px;letter-spacing:-.025em;font-weight:800;line-height:1.1}
+.brand span{font-size:13px;color:var(--muted);line-height:1.3}
+.tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:8px 22px;border-radius:100px;font-size:14.5px;font-weight:600;
+  color:var(--muted);cursor:pointer;border:1px solid transparent;background:none;
+  font-family:inherit;transition:.15s;flex:0 0 auto;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab.on{background:var(--accent);color:#fff}
+
+.pane{display:none}
+.pane.on{display:block}
+
+/* ── ДРЕВО ── */
+#p-tree{max-width:1600px;margin:0 auto;padding:20px 26px 70px}
+.treebox{background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:26px 18px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.stage{position:relative;margin:0 auto}
+.stage svg{position:absolute;left:0;top:0;overflow:visible}
+.genlab{position:sticky;left:0;top:0;width:0;height:0;z-index:4;float:left}
+.genlab .gl{position:absolute;left:4px;width:80px;padding:3px 0 3px 6px;background:rgba(255,255,255,.88);
+  border-radius:8px;line-height:1.1;pointer-events:none}
+.genlab .gl b{display:block;font-size:19px;font-weight:700;color:#c3b5a5}
+.genlab .gl span{display:block;font-size:10px;color:#968b80}
+@media(max-width:820px){.genlab .gl{width:22px;padding:2px 0 2px 5px;background:rgba(255,255,255,.75)}.genlab .gl span{display:none}.genlab .gl b{font-size:16px}}
+.p{position:absolute;border:2px solid;border-radius:22px;background:var(--card);
+  padding:9px 9px;cursor:pointer;text-align:center;transition:.14s;font-family:inherit;z-index:2}
+.p:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.1)}
+.p .nm{font-size:12px;font-weight:650;line-height:1.18}
+.p .yr{font-size:11px;color:var(--muted);margin-top:3px}
+.p.me{background:var(--accent);border-color:var(--accent);color:#fff}
+.p.me .yr{color:rgba(255,255,255,.85)}
+.p.hyp{border-style:dashed}
+.p.t2{opacity:.68}
+.p.t3{opacity:.5;border-style:dashed}
+.p.t4{opacity:.38;border-style:dotted;background:#fbf9f6}
+.p.t4::after{content:"?";position:absolute;top:-7px;right:-4px;width:19px;height:19px;
+  border-radius:50%;background:#b8aea2;color:#fff;font-size:12px;font-weight:800;line-height:19px;text-align:center}
+.p:hover{opacity:1}
+.p .pc{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.02em}
+.p.k{border-color:var(--k)} .p.s{border-color:var(--s)}
+.p.g{border-color:var(--g)} .p.n{border-color:var(--n)}
+.p.q::after{content:"?";position:absolute;top:-7px;right:-4px;width:19px;height:19px;
+  border-radius:50%;background:var(--q);color:#fff;font-size:12px;font-weight:800;
+  line-height:19px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.scrollhint{display:none;font-size:12.5px;color:var(--muted);margin-top:8px;padding:0 8px}
+.scrollhint.on{display:block}
+.gap{position:absolute;font-size:11px;letter-spacing:.04em;color:var(--muted);
+  background:var(--card);padding:0 10px;white-space:nowrap;transform:translateX(-50%);z-index:2}
+.badge{position:absolute;width:25px;height:25px;border-radius:50%;border:2px solid var(--muted);
+  background:var(--card);color:var(--ink);font-family:inherit;font-size:13.5px;font-weight:800;
+  line-height:21px;text-align:center;padding:0;cursor:pointer;z-index:4;transition:.13s}
+.badge:hover{transform:scale(1.14);box-shadow:0 2px 8px rgba(0,0,0,.14)}
+.badge.k{border-color:var(--k)} .badge.s{border-color:var(--s)}
+.badge.g{border-color:var(--g)} .badge.n{border-color:var(--n)}
+.badge.me{border-color:var(--accent)}
+.badge.qq{color:var(--muted)}
+.plates{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:20px}
+.plate{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px 20px}
+.plate h5{font-size:13px;font-weight:700;margin-bottom:2px;letter-spacing:-.01em}
+.plate span.d{display:block;font-size:11.5px;color:var(--muted);margin-bottom:10px}
+
+.lead{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:20px 24px;margin-bottom:16px;font-size:15.5px;line-height:1.65;color:#4b453d}
+.lead b{color:var(--ink)}
+.legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;padding:0 8px;
+  font-size:13px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:7px}
+.legend i{width:13px;height:13px;border-radius:50%;border:2px solid var(--muted);display:block}
+.legend i.dash{border-style:dashed}
+.legend i.qq{border:none;background:var(--q)}
+.legend i.ln{width:20px;height:0;border:none;border-top:1.6px dashed #b9b0a4;border-radius:0}
+
+/* ── гербы ── */
+.crests{display:flex;gap:26px;flex-wrap:wrap;margin-top:18px;padding-top:16px;
+  border-top:1px solid var(--line)}
+.crest{display:flex;align-items:center;gap:11px;font-size:12px;line-height:1.35;color:var(--muted)}
+.crest img{width:38px;height:46px;object-fit:contain;display:block}
+.crest b{display:block;color:var(--ink);font-size:13px;font-weight:650;margin-bottom:1px}
+
+/* ── родня чипами ── */
+.kin{margin-top:20px;background:var(--card);border:1px solid var(--line);
+  border-radius:18px;padding:24px 26px 26px}
+.kin h4{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);
+  font-weight:700;margin-bottom:9px}
+.kin>p{font-size:14.5px;line-height:1.62;color:#4b453d;margin-bottom:20px;max-width:78ch}
+.kin-g{columns:3 240px;column-gap:26px}
+.kin-col{break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;
+  display:inline-block;width:100%;margin:0 0 22px}
+.kin-col h5{font-size:13px;font-weight:700;margin-bottom:9px;letter-spacing:-.01em}
+.kin-col h5 span{display:block;font-weight:400;font-size:11.5px;color:var(--muted);margin-top:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:inherit;font-size:12.5px;line-height:1.2;padding:6px 11px;border-radius:100px;
+  border:1.5px solid #c8bfb3;background:var(--card);color:var(--ink);cursor:pointer;
+  transition:.13s;text-align:left}
+.chip.k{border-color:var(--k)}
+.chip:hover{background:#faf7f3;transform:translateY(-1px)}
+.chip.hyp{border-style:dashed}
+.chip.g{border-color:var(--g)} .chip.s{border-color:var(--s)} .chip.n{border-color:var(--n)}
+.chip em{font-style:normal;color:var(--muted);margin-left:5px;font-size:11.5px}
+
+/* ── разделитель между древами ── */
+.tdiv{margin:46px 0 0;background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:26px 28px}
+.tdiv-tag{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);
+  font-weight:700;margin-bottom:7px}
+.tdiv h3{font-size:26px;line-height:1.15;letter-spacing:-.024em;margin-bottom:9px}
+.tdiv p{font-size:15px;line-height:1.65;color:#4b453d;max-width:76ch}
+#treebox2{margin-top:16px}
+
+/* ── ПАНЕЛЬ ── */
+.drawer{position:fixed;top:0;right:-480px;width:452px;max-width:92vw;height:100vh;
+  background:var(--card);border-left:1px solid var(--line);z-index:100;
+  box-shadow:-14px 0 42px rgba(0,0,0,.12);transition:right .26s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;padding:28px 30px 70px}
+.drawer.on{right:0}
+.dx{position:absolute;top:18px;right:20px;background:none;border:none;font-size:26px;
+  cursor:pointer;color:var(--muted);line-height:1;font-family:inherit}
+.drawer h3{font-size:24px;line-height:1.18;letter-spacing:-.02em;margin:4px 44px 4px 0}
+.dmeta{font-size:13.5px;color:var(--muted);margin-bottom:22px}
+.tl{list-style:none;border-left:2px solid var(--line);padding-left:20px;margin-left:4px}
+.tl li{position:relative;padding:0 0 15px}
+.tl li::before{content:"";position:absolute;left:-25px;top:8px;width:9px;height:9px;
+  border-radius:50%;background:var(--accent)}
+.tl li:last-child{padding-bottom:0}
+.tl .yy{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.03em;
+  display:block;margin-bottom:2px}
+.tl .tx{font-size:15px;line-height:1.55}
+.dsrc{margin-top:24px;border-top:1px solid var(--line);padding-top:14px;
+  font-size:12.5px;line-height:1.55;color:var(--muted)}
+.fam{margin-top:20px;border-top:1px solid var(--line);padding-top:16px;
+  font-size:14px;line-height:1.7;color:#4b453d}
+.fam b{font-weight:600;color:var(--ink)}
+.fam a{color:var(--accent);text-decoration:none;cursor:pointer}
+.fam a:hover{text-decoration:underline}
+
+/* ── ИСТОРИЯ ── */
+#p-book{max-width:1180px;margin:0 auto;padding:20px 26px 70px}
+#p-sum{max-width:900px;margin:0 auto;padding:20px 26px 70px}
+#p-book.on{display:grid;grid-template-columns:214px minmax(0,1fr);gap:22px;align-items:start}
+.toc{position:sticky;top:112px;background:var(--card);border:1px solid var(--line);
+  border-radius:16px;padding:20px 8px 20px 18px}
+.toc h4{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:12px;font-weight:700}
+.toc a{display:block;padding:6px 0 6px 13px;font-size:13.5px;line-height:1.35;
+  color:var(--ink);text-decoration:none;border-left:2px solid var(--line);transition:.15s}
+.toc a:hover{color:var(--accent);border-color:var(--accent)}
+.toc a.on{color:var(--accent);border-color:var(--accent);font-weight:600}
+.tier2,.tier3,.tier4{border-radius:14px;padding:14px 18px 6px;margin:18px 0}
+.tier2{background:#f6f3ee;border:1.5px solid #e2dacd;color:#4a443d}
+.tier3{background:#f8f6f2;border:1.5px dashed #d8cfc2;color:#5f574e}
+.tier4{background:#faf9f7;border:1.5px dotted #d3cbc0;color:#7a7168;font-size:.95em}
+.tier2::before,.tier3::before,.tier4::before{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+.tier2::before{content:"Установлено, нужно подтвердить · 75—89%";color:#8a7a5a}
+.tier3::before{content:"Вероятно · 50—74%";color:#958a7c}
+.tier4::before{content:"? Гипотеза · меньше 50%";color:#a59a8e}
+.evg{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin:14px 0 22px}
+.evg:empty{display:none}
+.evc{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;cursor:zoom-in}
+.evc img{width:100%;height:130px;object-fit:cover;object-position:top;display:block;background:#eee}
+.evc div{padding:8px 10px;font-size:12px;line-height:1.35}
+.evc b{display:block;font-size:12.5px;margin-bottom:2px}
+.evc i{font-style:normal;color:var(--muted);font-size:11px}
+#evzoom{position:fixed;inset:0;background:rgba(20,16,12,.86);z-index:99;display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px}
+#evzoom.on{display:flex}
+#evzoom img{max-width:96vw;max-height:78vh;border-radius:8px;background:#fff}
+#evzoom p{color:#f3ede4;max-width:900px;font-size:14px;line-height:1.5;margin-top:12px;text-align:center}
+.dconf{margin-top:14px;font-size:12.5px;line-height:1.45;background:#f6f3ee;border-radius:10px;padding:9px 11px}
+.dconf i{display:block;margin-top:4px;font-style:normal;color:var(--muted)}
+.help{font-size:17px;line-height:1.6}
+.help h2{font-size:28px;margin-bottom:10px}
+.help .lead{font-size:18.5px;margin-bottom:26px}
+.hstep{display:flex;gap:18px;padding:22px 0;border-top:1px solid var(--line)}
+.hn{flex:none;width:42px;height:42px;border-radius:50%;background:var(--accent);color:#fff;font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center}
+.hstep h3{font-size:21px;margin:4px 0 10px}
+.hstep p{margin:8px 0}
+.htabs{display:flex;flex-direction:column;gap:10px}
+.hb{display:inline-block;background:var(--accent);color:#fff;border-radius:20px;padding:3px 14px;font-weight:650;margin-right:8px;font-size:15px}
+.hp{position:relative!important;display:inline-block;width:160px;left:auto!important;top:auto!important;cursor:default}
+.hdemo{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0;background:#f6f3ee;border-radius:14px;padding:16px}
+.harrow{font-size:15px;color:var(--muted);font-weight:600}
+.hcard{background:#fff;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,.12);padding:12px 16px;font-size:14px;line-height:1.5;max-width:300px}
+.htiers{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:12px 0}
+.htiers>div{background:#f6f3ee;border-radius:14px;padding:16px;text-align:center}
+.htiers p{font-size:15px;text-align:left}
+.hcolors{display:flex;gap:22px;flex-wrap:wrap;font-size:16px}
+.hcolors span{display:flex;align-items:center;gap:8px}
+.hcolors i{width:18px;height:18px;border-radius:50%;border:3px solid;display:block}
+.hbadge{display:inline-flex;width:30px;height:30px;border-radius:50%;border:2px solid var(--s);align-items:center;justify-content:center;font-weight:700;background:#fff}
+.hev{width:230px;cursor:default}.hev .himg{height:90px;background:repeating-linear-gradient(45deg,#eee,#eee 8px,#f6f6f6 8px,#f6f6f6 16px);display:flex;align-items:center;justify-content:center;color:#999;font-size:13px;padding:0}
+.hgl dt{font-weight:700;margin-top:12px}.hgl dd{margin:2px 0 0}
+.hgo{font-size:19px;margin-top:26px;border-top:1px solid var(--line);padding-top:20px}
+.hgo a{color:var(--accent);font-weight:700;cursor:pointer;text-decoration:underline}
+@media(max-width:600px){.htiers{grid-template-columns:1fr}.help{font-size:16px}.hstep{gap:12px}.hn{width:34px;height:34px;font-size:17px}}
+.sheet .yh{color:var(--accent);font-weight:600;white-space:nowrap}
+.sheet details.more{clear:both;margin:-6px 0 20px;border:1px solid var(--line);border-radius:10px;background:#fbf9f6}
+.sheet details.more>summary{cursor:pointer;list-style:none;padding:9px 16px;font-size:13.5px;font-weight:600;color:var(--accent)}
+.sheet details.more>summary::-webkit-details-marker{display:none}
+.sheet details.more>summary::before{content:"+ ";font-weight:800}
+.sheet details.more[open]>summary::before{content:"− "}
+.sheet details.more>*:not(summary){padding:0 16px}
+.sheet details.more>p:last-child{padding-bottom:4px}
+.partsep{margin:46px 0 10px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.ct{margin-top:30px}.ct.t1{color:#3d6b4a}.ct.t2{color:#7a6a4a}.ct.t3{color:#8a7a6a}.ct.t4{color:#9a8f85}
+.cd{font-size:13.5px;color:var(--muted);margin:4px 0 12px}
+.cl{display:flex;flex-direction:column;gap:8px}
+.ci{display:flex;gap:14px;align-items:flex-start;border:1.5px solid var(--line);border-left-width:5px;border-radius:12px;padding:10px 14px;cursor:pointer;background:#fff}
+.ci.k{border-left-color:var(--k)}.ci.s{border-left-color:var(--s)}.ci.g{border-left-color:var(--g)}.ci.n{border-left-color:var(--n)}
+.ci.t2{opacity:.82}.ci.t3{opacity:.7;border-style:dashed}.ci.t4{opacity:.6;border-style:dotted}
+.ci .cv{min-width:48px;font-weight:750;font-size:17px;color:var(--ink)}
+.ci .cnm{font-weight:650;font-size:14px}.ci .cnm span{font-weight:400;color:var(--muted);font-size:12.5px;margin-left:6px}
+.ci .cw{font-size:13px;margin-top:3px;line-height:1.45}.ci .cn{font-size:12.5px;margin-top:5px;color:#5d5348}
+.ci .clin{font-size:11px;color:var(--muted);margin-top:4px}
+.sheet{background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:50px 60px 58px;overflow:hidden}
+@media(max-width:1080px){
+  #p-book.on{grid-template-columns:1fr}
+  .toc{position:static}
+  .sheet{padding:30px 22px}
+}
+
+.ch{padding:0 0 56px;scroll-margin-top:120px}
+.ch-tag{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--accent);font-weight:700;margin-bottom:10px}
+.ch h2{font-size:35px;line-height:1.1;letter-spacing:-.028em;font-weight:800;margin-bottom:6px}
+.ch .when{font-size:14px;color:var(--muted);margin-bottom:24px}
+.ch p{font-size:17.5px;line-height:1.72;margin-bottom:18px;
+  font-family:Georgia,"Iowan Old Style","Times New Roman",serif;color:#2b2622}
+.ch p.first::first-letter{font-size:54px;float:left;line-height:.85;
+  padding:4px 9px 0 0;font-weight:700;color:var(--accent);font-family:Georgia,serif}
+.ch h3{font-size:20px;margin:30px 0 12px;letter-spacing:-.015em}
+.ch strong{font-weight:700}
+.ch::after{content:"";display:block;clear:both}
+.sheet figure{margin:0 0 20px}
+.sheet figure img{width:100%;display:block;border-radius:10px;border:1px solid var(--line);
+  background:#efeae2}
+.sheet figcaption{font-size:12.5px;color:var(--muted);margin-top:7px;line-height:1.45}
+.sheet figcaption em{font-style:normal;display:block;margin-top:3px;font-size:11.5px;opacity:.85}
+.figR{float:right;width:34%;margin:6px 0 18px 26px;clear:both}
+.figL{float:left;width:34%;margin:6px 26px 18px 0;clear:both}
+.figN{float:right;width:27%;margin:6px 0 16px 26px;clear:both}
+.figNL{float:left;width:27%;margin:6px 26px 16px 0;clear:both}
+.figTall{float:right;width:23%;margin:6px 0 16px 26px;clear:both}
+.sheet figure.figC{clear:both;float:none;width:72%;margin:24px auto}
+.figW{clear:both;margin:26px 0;width:100%;float:none}
+.quote{border-left:3px solid var(--accent);padding:12px 18px;margin:22px 0;clear:both;
+  background:#fbf9f6;border-radius:0 8px 8px 0;
+  font-family:Georgia,serif;font-size:15.5px;line-height:1.6;font-style:italic;color:#3d3833}
+.quote .src{display:block;font-style:normal;font-family:-apple-system,sans-serif;
+  font-size:11.5px;color:var(--muted);margin-top:8px}
+.hr{height:1px;background:var(--line);margin:0 0 52px;clear:both}
+.next{clear:both;background:var(--qbg);border:1px solid var(--qline);border-left:4px solid var(--q);
+  border-radius:0 12px 12px 0;padding:14px 20px;margin-top:26px;
+  font-size:14.5px;line-height:1.6;color:#4a4235;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+.next b{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#9a7b00;
+  display:block;margin-bottom:5px;font-weight:800}
+@media(max-width:820px){
+  .figR,.figL,.figN,.figNL,.figTall{float:none;width:70%;margin:20px auto}
+  .sheet figure.figC{width:100%}
+  .ch h2{font-size:27px}
+}
+
+.chsrc{clear:both;font-size:12.5px;line-height:1.55;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;margin-top:22px;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+.chsrc b{color:var(--ink);font-weight:650}
+
+/* ── ОБНОВЛЕНИЯ ── */
+#p-log{max-width:820px;margin:0 auto;padding:20px 26px 90px}
+.rel{background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:16px 20px;margin-bottom:18px}
+.rel-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+  border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:18px}
+.rel-h h3{font-size:18px;letter-spacing:-.018em;font-weight:750}
+.rel-h .d{font-size:12.5px;color:var(--muted)}
+.rel-h a{margin-left:auto;font-size:13px;color:var(--accent);text-decoration:none;
+  border:1px solid var(--qline);background:var(--qbg);border-radius:100px;padding:4px 13px}
+.rel-h a:hover{text-decoration:underline}
+.rel h4{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);
+  font-weight:700;margin:0 0 10px}
+.rel h4.open{color:#9a7b00}
+.rel ul{list-style:none;margin-bottom:22px}
+.rel li{position:relative;padding-left:16px;margin-bottom:6px;font-size:13px;line-height:1.5;color:#3d3833}
+.rel li::before{content:"";position:absolute;left:1px;top:7px;width:6px;height:6px;
+  border-radius:50%;background:var(--accent)}
+.rel h4.open+ul li::before{background:var(--q)}
+.rel ul:last-child{margin-bottom:0}
+.note-b{font-size:13.5px;line-height:1.6;color:var(--muted);padding:0 4px;margin-top:6px}
+
+@media(max-width:600px){
+  .top-in{padding:11px 16px 10px}
+  .brand h1{font-size:19px}
+  #p-tree,#p-book,#p-log,#p-sum{padding-left:16px;padding-right:16px}
+  .treebox{padding:20px 12px}
+  .lead{padding:16px 18px;font-size:15px}
+  .kin{padding:20px 18px}
+  .tdiv{padding:20px 18px}
+  .tdiv h3{font-size:22px}
+  .rel{padding:20px 18px 22px}
+  .sheet{padding:26px 16px}
+}
+
+/* ── ОБНОВЛЕНИЯ: единый формат (рисует renderReleases из people.js) ── */
+.upd{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 22px 20px;margin-bottom:18px;max-width:820px}
+.upd h3{font-size:19px;letter-spacing:-.018em;font-weight:750;border-bottom:1px solid var(--line);padding-bottom:10px}
+.upd h4{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:16px 0 8px}
+.upd ul{padding-left:20px;font-size:14.5px;line-height:1.6;color:#4b453d}
+.upd li{margin-bottom:6px}
+.upd-br{margin-bottom:10px}
+.upd-tag{display:inline-block;font-size:12px;font-weight:650;padding:2px 10px;border-radius:100px;border:1.5px solid var(--line);margin-bottom:6px}
+.upd-tag.k{border-color:var(--k);color:var(--k)} .upd-tag.n{border-color:var(--n);color:var(--n)}
+.upd-tag.s{border-color:var(--s);color:var(--s)} .upd-tag.g{border-color:var(--g);color:var(--g)} .upd-tag.o{color:var(--muted)}
+</style>
+
+<div class="top"><div class="top-in">
+  <div class="brand">
+    <h1>Вожовы · Кольцовы · Смолины</h1>
+    <span>Наталья Вожова и Дмитрий Смолин · Гнилуша — Павловск · Колпачиха · Подберезье — Дубна</span>
+  </div>
+  <div class="tabs">
+    <button class="tab on" data-p="help">С чего начать</button>
+    <button class="tab" data-p="tree">Древо</button>
+    <button class="tab" data-p="book">История</button>
+    <button class="tab" data-p="conf">Достоверность</button>
+    <button class="tab" data-p="log">Обновления</button>
+  </div>
+</div></div>
+
+<section class="pane on" id="p-help">
+<div class="sheet help">
+  <h2>Как пользоваться этой книгой</h2>
+  <p class="lead">Здесь собрана история трёх родов — <b>Вожовых</b>, <b>Кольцовых</b> и <b>Смолиных</b>. Всё, что мы нашли, подтверждено старинными документами из архивов: метрическими книгами, переписями, военными архивами. Ниже — как всё устроено. Читать можно в любом порядке.</p>
+
+  <div class="hstep"><div class="hn">1</div><div>
+    <h3>Четыре раздела — кнопки вверху страницы</h3>
+    <div class="htabs">
+      <div><span class="hb">Древо</span> Все родственники на одной схеме: сверху — Александр и Никита, ниже — родители, деды, прадеды и так далее.</div>
+      <div><span class="hb">История</span> Книга: рассказ о каждой семье и месте, где она жила, с фотографиями старинных записей.</div>
+      <div><span class="hb">Достоверность</span> Насколько мы уверены в каждом человеке и что ещё нужно проверить.</div>
+      <div><span class="hb">Обновления</span> Что нового нашли и когда.</div>
+    </div>
+    <p>Чтобы перейти в раздел, просто нажмите на его название.</p>
+  </div></div>
+
+  <div class="hstep"><div class="hn">2</div><div>
+    <h3>Нажмите на человека — откроется его карточка</h3>
+    <p>На древе и в списках каждое имя можно нажать. Справа откроется карточка: годы жизни, все события по документам, родители и дети, насколько мы в нём уверены и фотографии его документов.</p>
+    <div class="hdemo"><div class="p s t1 hp"><div class="nm">Сергей Семенович Кольцов</div><div class="yr">1906 — 1969</div></div><span class="harrow">→ нажали →</span><div class="hcard"><b>Сергей Семенович Кольцов</b><br><small>1906 — 1969</small><br><span>1906 — родился 23 сентября в Колпачихе…</span><br><span>1943 — медаль «За отвагу»…</span></div></div>
+    <p>Закрыть карточку: нажмите на <b>×</b> в её углу или в любое место вне карточки. На компьютере можно нажать клавишу <b>Esc</b>.</p>
+  </div></div>
+
+  <div class="hstep"><div class="hn">3</div><div>
+    <h3>Насколько точно известен человек — видно по рамке</h3>
+    <div class="htiers">
+      <div><div class="p s t1 hp"><div class="nm">Иван Анфимович</div><div class="yr">ок. 1836 — ?</div></div><p><b>Яркая рамка</b> — известен достоверно, на 90—100%. Есть документы или его знает семья.</p></div>
+      <div><div class="p g t2 hp"><div class="nm">Матвей Архипович</div><div class="yr">1859 — 1889</div><div class="pc">≈84%</div></div><p><b>Бледная рамка с процентом</b> — человек найден, но одно звено ещё нужно подтвердить.</p></div>
+      <div><div class="p g t3 hp"><div class="nm">Савва Андреевич</div><div class="yr">ок. 1748 — ?</div><div class="pc">≈70%</div></div><p><b>Бледная и пунктирная</b> — вероятно, но прямого документа нет.</p></div>
+      <div><div class="p g t4 hp"><div class="nm">Яков Диомидович</div><div class="yr">ок. 1824 — ?</div><div class="pc">гипотеза</div></div><p><b>Почти прозрачная, со знаком ?</b> — пока только предположение.</p></div>
+    </div>
+    <p>Процент — это уверенность во всей цепочке от Александра и Никиты до этого человека.</p>
+  </div></div>
+
+  <div class="hstep"><div class="hn">4</div><div>
+    <h3>Цвет рамки — это род</h3>
+    <div class="hcolors"><span><i style="border-color:var(--k)"></i>Вожовы</span><span><i style="border-color:var(--s)"></i>Кольцовы</span><span><i style="border-color:var(--g)"></i>Смолины</span><span><i style="border-color:var(--n)"></i>Звягинцевы, Романовы, Ивановы, Румянцевы</span></div>
+  </div></div>
+
+  <div class="hstep"><div class="hn">5</div><div>
+    <h3>Кружки с цифрами — братья, сёстры и дети</h3>
+    <p>Чтобы древо не было слишком большим, братья и сёстры спрятаны в кружок <b>сбоку</b> от человека, а дети — в кружок <b>сверху</b>. Цифра — сколько их. Нажмите на кружок, и появится список имён.</p>
+    <div class="hdemo"><div class="p s t1 hp"><div class="nm">Сергей Семенович</div><div class="yr">1906 — 1969</div></div><span class="hbadge s">6</span><span>← братья и сёстры</span></div>
+    <p>Линии соединяют родителей и детей. <b>Пунктирная линия</b> — связь ещё не доказана документом.</p>
+  </div></div>
+
+  <div class="hstep"><div class="hn">6</div><div>
+    <h3>Древо большое — его можно двигать</h3>
+    <p>На компьютере прокрутите древо колёсиком мыши или потяните полосу прокрутки вбок. На телефоне и планшете — проведите пальцем. Цифры слева — номер поколения.</p>
+  </div></div>
+
+  <div class="hstep"><div class="hn">7</div><div>
+    <h3>Старинные документы — нажмите, чтобы увеличить</h3>
+    <p>В книге «История» и в карточках людей есть маленькие фотографии записей из архивов. Нажмите на любую — она откроется крупно, а под ней будет расшифровка старинного текста и откуда взят документ. Чтобы закрыть, нажмите на тёмный фон.</p>
+    <div class="hdemo"><div class="evc hev"><div class="himg">скан записи</div><div><b>Венчание Ивана Анфимова и Клавдии, 1854</b><i>метрическая книга с. Лосево</i></div></div><span class="harrow">→ нажали → откроется крупно</span></div>
+  </div></div>
+
+  <div class="hstep"><div class="hn">8</div><div>
+    <h3>Если мелко — увеличьте</h3>
+    <p>На компьютере: держите клавишу <b>Ctrl</b> (на Mac — <b>⌘ Cmd</b>) и нажмите <b>+</b>. Уменьшить — тот же способ с <b>−</b>. На телефоне раздвиньте экран двумя пальцами.</p>
+  </div></div>
+
+  <div class="hstep"><div class="hn">9</div><div>
+    <h3>Как читать старые записи</h3>
+    <dl class="hgl">
+      <dt>Метрическая книга</dt><dd>Церковная книга записей о рождениях (крещениях), венчаниях и смертях. До 1918 года — главный документ о человеке.</dd>
+      <dt>Исповедная ведомость</dt><dd>Ежегодный список прихожан по дворам с возрастом каждого. По ним видно, кто жил в одном доме.</dd>
+      <dt>Ревизская сказка</dt><dd>Перепись податного населения; их было десять, с 1719 по 1858 год.</dd>
+      <dt>Отчество в записях</dt><dd>Писали «Иван Анфимов», «Клавдия Венедиктова» — это не фамилии, а отчества. Фамилии у крестьян появились в записях позже.</dd>
+      <dt>Восприемники, поручители</dt><dd>Крёстные при крещении и свидетели со стороны жениха и невесты при венчании. Часто это близкая родня — так мы и находим связи.</dd>
+      <dt>Даты</dt><dd>До 1918 года — по старому стилю. В XIX веке к дате прибавляют 12 дней, в XX — 13.</dd>
+      <dt>Крепостные, казённые, однодворцы</dt><dd>Кольцовы и родня Клавдии были крепостными помещиков до освобождения; Смолины — казёнными (государственными) крестьянами; Вожовы — однодворцами, потомками служилых людей южной границы.</dd>
+    </dl>
+  </div></div>
+
+  <p class="hgo">Начните с <a onclick="showPane('tree');window.scrollTo(0,0)">древа</a> или <a onclick="showPane('book');window.scrollTo(0,0)">книги «История»</a>.</p>
+</div>
+</section>
+
+<section class="pane" id="p-tree">
+  <div class="lead">
+    Одно древо на двоих. Сверху — сыновья <b>Александр</b> и <b>Никита</b>, под ними <b>Наталья</b> и <b>Дмитрий</b>, а дальше вниз по поколениям — родители, деды и бабушки, прадеды. Слева предки Натальи: <b>Вожовы</b> по отцу и <b>Кольцовы</b> по маме. Справа предки Дмитрия: <b>Смолины</b>. Насколько мы уверены в человеке, видно по рамке: <b>яркая</b> — достоверно (90—100%), <b>бледная</b> — установлен, но нужно подтвердить (75—89%), <b>бледная с пунктиром</b> — вероятно (50—74%), <b>почти прозрачная со знаком ?</b> — пока гипотеза. Процент — уверенность во всей цепочке от Александра и Никиты до этого человека; подробно — на вкладке «Достоверность». Пунктирная линия — связь ещё не доказана документом. Боковая родня спрятана в кружки у узлов: <b>сбоку</b> — братья и сёстры, <b>сверху</b> — дети. Нажмите на кружок — откроется список имён, на имя или на узел — карточка человека. Ранние семьи тех же фамилий и мест, пока не присоединённые к роду, — в блоках под древом.
+  </div>
+  </div>
+  <div class="treebox" id="treebox1"><div class="stage" id="stage1"><svg></svg></div></div>
+  <div class="scrollhint" id="scrollhint">Древо шире экрана — прокручивается вбок</div>
+  <div class="legend">
+    <span><i style="border-color:var(--k)"></i>Вожовы</span>
+    <span><i style="border-color:var(--s)"></i>Кольцовы</span>
+    <span><i style="border-color:var(--g)"></i>Смолины</span>
+    <span><i style="border-color:var(--n)"></i>Звягинцевы, Романовы, Ивановы, Румянцевы</span>
+    <span><i></i>90—100% — достоверно</span>
+    <span><i style="opacity:.6"></i>75—89% — установлен, нужно подтвердить</span>
+    <span><i class="dash" style="opacity:.5"></i>50—74% — вероятно</span>
+    <span><i class="qq" style="background:#b8aea2"></i>меньше 50% — гипотеза</span>
+    <span><i class="ln"></i>пунктирная линия — связь не доказана</span>
+  </div>
+  <div class="plates" id="plates"></div>
+</section>
+
+<section class="pane" id="p-conf">
+  <div class="sheet" id="confbody"></div>
+</section>
+
+<section class="pane" id="p-sum">
+  <div class="sheet" id="sumbody"></div>
+</section>
+
+<section class="pane" id="p-places">
+  <div class="sheet" id="placesbody"></div>
+</section>
+
+<section class="pane" id="p-book">
+  <aside class="toc"><h4>Оглавление</h4><div id="toc"></div></aside>
+  <div class="sheet" id="bookbody"></div>
+</section>
+
+<section class="pane" id="p-log">
+  <div id="releases"></div>
+  <div class="note-b">Обновления выходят пачками раз в несколько дней; каждая прежняя версия
+    остаётся доступной по своей ссылке.</div>
+</section>
+
+<div class="drawer" id="dr"><button class="dx" onclick="closeDr()">×</button><div id="drin"></div></div>
+
+<script src="people.js"></script>
+<script>
+const W=140, GAPX=16, ROWH=176, NODEH=72, U=W+GAPX;
+const LINE_OF={}; T.nodes.forEach(n=>LINE_OF[n.c]=n.l);
+const NODE_BY={}; T.nodes.forEach(n=>NODE_BY[n.c]=n);
+
+const stage=document.getElementById("stage1");
+const box=document.getElementById("treebox1");
+const svg=stage.querySelector("svg");
+
+/* нормализуем колонки: слева оставляем место под бейдж */
+const PAD=34, LG=84; /* LG — левое поле под подписи поколений */
+const MINR=Math.min(0,...T.nodes.map(n=>n.row));
+if(MINR<0){ T.nodes.forEach(n=>n.row-=MINR); (T.gaps||[]).forEach(g=>g.under-=MINR); }
+const minCol=Math.min(...T.nodes.map(n=>n.col));
+const pos={};
+T.nodes.forEach(n=>{ pos[n.c]={x:(n.col-minCol)*U+PAD+LG, y:n.row*ROWH, n:n}; });
+const maxX=Math.max(...T.nodes.map(n=>(n.col-minCol)*U))+W+PAD*2+LG;
+const maxY=Math.max(...T.nodes.map(n=>n.row))*ROWH+NODEH+34;
+stage.style.width=maxX+"px"; stage.style.height=maxY+"px";
+svg.setAttribute("width",maxX); svg.setAttribute("height",maxY);
+
+/* ── линии ── */
+let paths="";
+T.pairs.forEach(([a,b])=>{
+  const p=pos[a], q=pos[b]; if(!p||!q) return;
+  const y=p.y+NODEH/2;
+  paths+=`<path d="M${p.x+W} ${y} H${q.x}" fill="none" stroke="#b9ada0" stroke-width="2"/>`;
+});
+(T.sibs||[]).forEach(([a,b])=>{
+  const p=pos[a], q=pos[b]; if(!p||!q) return;
+  const y=p.y+NODEH/2;
+  paths+=`<path d="M${p.x+W} ${y} H${q.x}" fill="none" stroke="#b9ada0" stroke-width="2"/>`;
+});
+T.links.forEach(([child,parent,dash])=>{
+  const c=pos[child], q=pos[parent]; if(!c||!q) return;
+  const x1=c.x+W/2, y1=c.y+NODEH, x2=q.x+W/2, y2=q.y;
+  const my=y1+(y2-y1)/2;
+  const d=dash?' stroke-dasharray="5 5"':'';
+  paths+=`<path d="M${x1} ${y1} V${my} H${x2} V${y2}" fill="none" stroke="#d0c7bb" stroke-width="1.6"${d}/>`;
+});
+/* усики к бейджам */
+T.nodes.forEach(n=>{
+  const p=pos[n.c];
+  if(n.sib){ const y=p.y+NODEH/2, side=sibSide(n);
+    paths+= side==="right"
+      ? `<path d="M${p.x+W} ${y} H${p.x+W+7}" stroke="#b9ada0" stroke-width="1.6" fill="none"/>`
+      : `<path d="M${p.x} ${y} H${p.x-7}" stroke="#b9ada0" stroke-width="1.6" fill="none"/>`; }
+  if(n.kids){ const x=p.x+W/2+22;
+    paths+=`<path d="M${x} ${p.y} V${p.y-7}" stroke="#b9ada0" stroke-width="1.6" fill="none"/>`; }
+});
+/* ── этажи: пунктир и номер поколения ── */
+const GEN_NAME=["родители","бабушки и дедушки","прадеды","прапрадеды","5-е поколение","6-е поколение","7-е поколение","8-е поколение","9-е поколение"];
+let floors="";
+const maxRow=Math.max(...T.nodes.map(n=>n.row));
+for(let r=0;r<=maxRow;r++){
+  if(r>0){ const yl=r*ROWH-34;
+    floors+=`<path d="M0 ${yl} H${maxX}" stroke="#e3dace" stroke-width="1.2" stroke-dasharray="4 7" fill="none"/>`; }
+}
+/* подписи поколений — отдельный слой, прилипает к левому краю при прокрутке */
+const genlab=document.createElement("div"); genlab.className="genlab";
+for(let r=0;r<=maxRow;r++){ const d=document.createElement("div"); d.className="gl"; d.dataset.r=r;
+  const gi=r+MINR; d.innerHTML=gi<0?`<b>·</b><span>Александр и Никита</span>`:`<b>${gi+1}</b><span>${GEN_NAME[gi]||""}</span>`; genlab.appendChild(d); }
+box.insertBefore(genlab, stage);
+svg.innerHTML=floors+paths;
+
+/* справа или слева ставить бейдж «братья и сёстры» */
+function sibSide(n){
+  const busy=T.nodes.some(m=>m!==n && m.row===n.row && m.col>n.col && (m.col-n.col)*U < W+42);
+  const spouseRight=T.pairs.some(([x,y])=>(x===n.c&&NODE_BY[y]&&NODE_BY[y].col>n.col)||(y===n.c&&NODE_BY[x]&&NODE_BY[x].col>n.col));
+  if(spouseRight) return "left";
+  return busy?"left":"right";
+}
+
+/* ── узлы ── */
+T.nodes.forEach(n=>{
+  const b=BIO[n.c]||{t:n.c,y:""};
+  const tier=(typeof confTier==="function")?confTier(n.c):"";
+  const cls=["p", n.l==="me"?"me":(n.l||""), tier, (!tier && !b.doc && !b.fam && n.l!=="me")?"hyp":"", (!tier && b.q)?"q":""]
+    .filter(Boolean).join(" ");
+  const el=document.createElement("button");
+  el.className=cls; el.dataset.c=n.c;
+  el.style.left=pos[n.c].x+"px"; el.style.top=pos[n.c].y+"px"; el.style.width=W+"px";
+  const pv=(typeof CONF!=="undefined"&&CONF[n.c])?CONF[n.c][0]:null;
+  const pct=(pv!=null && pv<90)?`<div class="pc">${pv>=50?"≈"+pv+"%":"гипотеза"}</div>`:"";
+  el.innerHTML=`<div class="nm">${b.t}</div><div class="yr">${b.y||""}</div>${pct}`;
+  stage.appendChild(el);
+
+  const col=n.l==="me"?"me":(n.l||"");
+  if(n.sib) addBadge(n,"sib",col);
+  if(n.kids) addBadge(n,"kids",col);
+});
+
+function addBadge(n,kind,col){
+  const d=n[kind], p=pos[n.c];
+  const el=document.createElement("button");
+  el.className="badge "+col+(d.q?" qq":"");
+  el.textContent=d.q?"?":String((d.c||[]).length);
+  el.dataset.b=n.c; el.dataset.k=kind;
+  el.title=kind==="sib"?"братья и сёстры":"другие дети";
+  if(kind==="sib"){
+    const side=sibSide(n);
+    el.style.left=(side==="right"?p.x+W+7:p.x-32)+"px";
+    el.style.top=(p.y+NODEH/2-12.5)+"px";
+  }else{
+    el.style.left=(p.x+W/2+9.5)+"px";
+    el.style.top=(p.y-7-25)+"px";
+  }
+  stage.appendChild(el);
+}
+
+/* ── подписи разрывов и «братья» ── */
+(T.gaps||[]).forEach(g=>{
+  const el=document.createElement("div");
+  el.className="gap"; el.textContent=g.text;
+  el.style.left=((g.col-minCol)*U+PAD+LG+W/2)+"px";
+  el.style.top=(g.under*ROWH+(ROWH+NODEH)/2-8)+"px";
+  stage.appendChild(el);
+});
+(T.sibs||[]).forEach(([a,b,label])=>{
+  if(!label||!pos[a]||!pos[b]) return;
+  const el=document.createElement("div");
+  el.className="gap"; el.textContent=label;
+  el.style.left=((pos[a].x+W+pos[b].x)/2)+"px";
+  el.style.top=(pos[a].y+NODEH/2-9)+"px";
+  stage.appendChild(el);
+});
+
+function fit(){
+  if(!box.offsetParent) return;
+  const avail=box.clientWidth-36;
+  const k=Math.min(1, Math.max(avail/maxX, 0.8));
+  stage.style.transform="scale("+k+")";
+  stage.style.transformOrigin="top left";
+  box.style.height=(maxY*k+46)+"px";
+  stage.style.marginLeft=Math.max(0,(avail-maxX*k)/2)+"px";
+  const wide=maxX*k>avail;
+  box.style.overflowX=wide?"auto":"hidden";
+  document.getElementById("scrollhint").classList.toggle("on",wide);
+  if(wide && pos.natalya) box.scrollLeft=pos.natalya.x*k+W*k/2-box.clientWidth/2;
+  const off=stage.getBoundingClientRect().top-genlab.getBoundingClientRect().top;
+  genlab.querySelectorAll(".gl").forEach(d=>{ d.style.top=(off+(+d.dataset.r*ROWH+NODEH/2)*k-17)+"px"; });
+}
+window.addEventListener("resize",fit);
+fit();
+
+/* ── карточка человека ── */
+function open(code){
+  const b=BIO[code]; if(!b) return;
+  let h=`<h3>${b.t}</h3><div class="dmeta">${b.y||""}</div><ul class="tl">`;
+  (b.l||[]).forEach(s=>{
+    const m=s.match(/^((?:[А-Яа-яЁё]{0,8}\s)?\d{4}(?:-е)?(?:\s*[—–-]\s*\d{4}(?:-е)?)?)\s+—\s+([\s\S]*)$/);
+    if(m) h+=`<li><span class="yy">${m[1].trim()}</span><span class="tx">${m[2]}</span></li>`;
+    else  h+=`<li><span class="tx">${s}</span></li>`;
+  });
+  h+=`</ul>`;
+  const link=c=>BIO[c]?`<a onclick="open('${c}')">${BIO[c].t}</a>`:"";
+  const rows=[];
+  const grp=c=>(BIO[c]||{}).nofam;
+  const nd=NODE_BY[code]||{};
+  if(!nd.nofam && !b.nofam){
+    const par=[...new Set(T.links.filter(l=>l[0]===code&&l[2]===0&&!grp(l[1])).map(l=>l[1]))];
+    if(par.length) rows.push(["Родители",par]);
+    const soft=[...new Set(T.links.filter(l=>l[0]===code&&l[2]===1&&!grp(l[1])).map(l=>l[1]))];
+    if(soft.length) rows.push(["Выше по линии, связь не доказана",soft]);
+    const kidsInTree=[...new Set(T.links.filter(l=>l[1]===code&&l[2]===0&&!grp(l[0])).map(l=>l[0]))];
+    const allKids=kidsInTree.concat(((nd.kids||{}).c)||[]);
+    if(allKids.length) rows.push([allKids.length>1?"Дети":"Ребёнок",[...new Set(allKids)]]);
+    const softK=[...new Set(T.links.filter(l=>l[1]===code&&l[2]===1&&!grp(l[0])).map(l=>l[0]))];
+    if(softK.length) rows.push(["Ниже по линии, связь не доказана",softK]);
+  }
+  const sp=(T.pairs.find(pr=>pr.includes(code))||[]).filter(x=>x!==code);
+  if(sp.length) rows.push(["Супруг",sp]);
+  if((nd.sib||{}).c) rows.push(["Братья и сёстры",nd.sib.c]);
+  if((nd.kids||{}).c && b.nofam) rows.push([(nd.kids.label||"Названы в этой записи"),nd.kids.c]);
+  (b.f||[]).forEach(r=>rows.push(r));
+  const f=rows.map(([lab,cs])=>{
+    const t=cs.map(link).filter(Boolean).join(", ");
+    return t?`<div><b>${lab}:</b> ${t}</div>`:"";
+  }).join("");
+  if(f) h+=`<div class="fam">${f}</div>`;
+  if(b.s) h+=`<div class="dsrc">${b.s}</div>`;
+  if(typeof CONF!=="undefined"&&CONF[code]&&CONF[code][0]){
+    const v=CONF[code][0]; h+=`<div class="dconf"><b>Достоверность ${v}%.</b> ${CONF[code][1]}${(v<90&&typeof CONF_NEXT!=="undefined"&&CONF_NEXT[code])?" <i>Что подтвердит: "+CONF_NEXT[code]+"</i>":""}</div>`;}
+  h+=`<div class="evg" data-who="${code}" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))"></div>`;
+  document.getElementById("drin").innerHTML=h;
+  if(typeof fillEvg==="function") fillEvg(document.getElementById("drin"));
+  document.getElementById("dr").classList.add("on");
+}
+function closeDr(){document.getElementById("dr").classList.remove("on")}
+
+/* ── список по клику на кружок ── */
+function openList(code,kind){
+  const n=NODE_BY[code], b=BIO[code]; if(!n||!b) return;
+  const d=n[kind]||{};
+  const title=d.label||(kind==="sib"?"Братья и сёстры":"Другие дети");
+  const sub=kind==="sib"?`братья и сёстры — ${b.t}`:(d.label?`${d.label.toLowerCase()} — ${b.t}`:`дети, кроме того, кто в древе, — ${b.t}`);
+  let h=`<h3>${title}</h3><div class="dmeta">${sub}</div>`;
+  if(d.q||!d.c||!d.c.length){
+    h+=`<ul class="tl"><li><span class="tx">Имён пока нет ни в семейных записях, ни в документах.</span></li></ul>`;
+  }else{
+    h+=`<ul class="tl">`+d.c.map(c=>{
+      const x=BIO[c]; if(!x) return "";
+      const yr=x.y&&x.y!=="—"?`<span class="yy">${x.y}</span>`:"";
+      return `<li>${yr}<span class="tx"><a onclick="open('${c}')">${x.t}</a></span></li>`;
+    }).join("")+`</ul>`;
+  }
+  if(d.note) h+=`<div class="dsrc">${d.note}</div>`;
+  document.getElementById("drin").innerHTML=h;
+  document.getElementById("dr").classList.add("on");
+}
+
+/* ── плашки под древом ── */
+document.getElementById("plates").innerHTML=PLATES.map(([t,d,codes])=>{
+  const chips=codes.filter(c=>BIO[c]).map(c=>{
+    const b=BIO[c];
+    const cls=["chip", b.tone||"", (b.doc||b.fam)?"":"hyp"].filter(Boolean).join(" ");
+    const y=b.y&&b.y!=="—"?`<em>${b.y}</em>`:"";
+    return `<button class="${cls}" data-c="${c}">${b.t}${y}</button>`;
+  }).join("");
+  return chips?`<div class="plate"><h5>${t}</h5><span class="d">${d}</span>
+    <div class="chips">${chips}</div></div>`:"";
+}).join("");
+
+/* ── вкладки ── */
+function showPane(p){
+  const el=document.getElementById("p-"+p); if(!el) return;
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x.dataset.p===p));
+  document.querySelectorAll(".pane").forEach(x=>x.classList.remove("on"));
+  el.classList.add("on");
+  if(p==="tree") setTimeout(fit,0);
+}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDr()});
+document.addEventListener("click",e=>{
+  const bg=e.target.closest(".badge");
+  if(bg){ openList(bg.dataset.b,bg.dataset.k); return; }
+  const p=e.target.closest(".p,.chip");
+  if(p){ open(p.dataset.c); return; }
+  const t=e.target.closest(".tab");
+  if(t){ showPane(t.dataset.p); window.scrollTo(0,0); return; }
+  const dr=document.getElementById("dr");
+  if(dr.classList.contains("on")&&!e.target.closest("#dr")) closeDr();
+});
+
+/* ── подсветка годов в тексте книги ── */
+function highlightYears(root){
+  const re=/(?<![\d№.])(?<!(?:лл?|с|д|ф|оп|№|т|обр|кадр)\.? ?)(1[6-9]\d\d)(?:[–—-](?:1[6-9]\d\d|\d\d))?(?:-(?:м|х|е|го|й|ом))?(?!\d)/g;
+  const skip=el=>el.closest(".next,.src,a,.yh,h2,.when,.ch-tag,figcaption em,.evg,.chsrc,summary");
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>
+    (re.lastIndex=0,re.test(n.nodeValue))&&!skip(n.parentElement)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT});
+  const nodes=[];while(w.nextNode())nodes.push(w.currentNode);
+  nodes.forEach(n=>{ re.lastIndex=0; const f=document.createDocumentFragment();let last=0,m;const v=n.nodeValue;
+    while((m=re.exec(v))){f.append(v.slice(last,m.index));const sp=document.createElement("span");sp.className="yh";sp.textContent=m[0];f.append(sp);last=m.index+m[0].length;}
+    f.append(v.slice(last));n.replaceWith(f);});
+}
+
+/* ── ИСТОРИЯ: подгрузка book.html ── */
+let bookAnchor=null;
+Promise.all([fetch("book.html").then(r=>r.text()),fetch("places.html").then(r=>r.text()).catch(()=>"")]).then(([t,pl])=>{
+  const body=document.getElementById("bookbody");
+  body.innerHTML=t.replace(/<style>[\s\S]*?<\/style>/ig,"")+(pl?'<div class="partsep">Места, откуда наши предки</div>'+pl:"");
+  try{highlightYears(body);}catch(e){}
+  const toc=document.getElementById("toc");
+  body.querySelectorAll(":scope > .ch").forEach(ch=>{
+    const a=document.createElement("a");
+    a.href="#"+ch.id;
+    a.textContent=ch.dataset.nav||(ch.querySelector("h2")||{}).textContent||ch.id;
+    toc.appendChild(a);
+  });
+  const obs=new IntersectionObserver(es=>es.forEach(en=>{
+    if(en.isIntersecting){
+      toc.querySelectorAll("a").forEach(a=>a.classList.remove("on"));
+      const a=toc.querySelector(`a[href="#${en.target.id}"]`); if(a)a.classList.add("on");
+    }
+  }),{rootMargin:"-12% 0px -74% 0px"});
+  body.querySelectorAll(".ch").forEach(c=>obs.observe(c));
+  if(typeof fillEvg==="function") setTimeout(()=>fillEvg(body),0);
+  if(bookAnchor){
+    const el=document.getElementById(bookAnchor); bookAnchor=null;
+    if(el) setTimeout(()=>el.scrollIntoView({block:"start"}),0);
+  }
+});
+
+/* ── ЧТО НАШЛИ: подгрузка summary.html ── */
+fetch("summary.html").then(r=>r.text()).then(x=>{document.getElementById("sumbody").innerHTML=x;});
+fetch("places.html").then(r=>r.text()).then(x=>{document.getElementById("placesbody").innerHTML=x;});
+
+/* ── ДОКУМЕНТЫ: галереи сканов по людям ── */
+let EV=[];
+function fillEvg(root){
+  (root||document).querySelectorAll(".evg[data-who]").forEach(g=>{
+    if(g.dataset.done) return; const who=g.dataset.who.split(",").map(x=>x.trim());
+    const items=EV.filter(e=>e.who.some(w=>who.includes(w))).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+    g.innerHTML=items.map((e,i)=>`<div class="evc" data-i="${EV.indexOf(e)}"><img loading="lazy" src="${e.img}" alt=""><div><b>${e.title}</b><i>${e.source||""}</i></div></div>`).join("");
+    g.dataset.done=1;
+  });
+}
+fetch("ev.json").then(r=>r.ok?r.json():[]).then(j=>{EV=j||[]; fillEvg();}).catch(()=>{});
+document.addEventListener("click",e=>{const c=e.target.closest(".evc"); if(!c) return; const ev=EV[+c.dataset.i];
+  let z=document.getElementById("evzoom"); if(!z){z=document.createElement("div");z.id="evzoom";document.body.appendChild(z);z.addEventListener("click",()=>z.classList.remove("on"));}
+  z.innerHTML=`<img src="${ev.img}"><p><b>${ev.title}</b><br>«${ev.quote||""}»<br><span style="opacity:.7">${ev.source||""}</span></p>`; z.classList.add("on");});
+
+/* ── ДОСТОВЕРНОСТЬ ── */
+(function renderConf(){
+  const box=document.getElementById("confbody"); if(!box||typeof CONF==="undefined") return;
+  const LN={k:"Вожовы",s:"Кольцовы",g:"Смолины",n:"Звягинцевы, Романовы, Ивановы, Румянцевы",me:""};
+  const tiers=[["t1","Достоверно — 90—100%","Связь каждого звена подтверждена документом или известна семье."],
+    ["t2","Установлен, нужно подтвердить — 75—89%","Человек найден в документах, но одно звено цепочки держится на косвенных признаках."],
+    ["t3","Вероятно — 50—74%","Несколько признаков сходятся, прямого документа на связь нет."],
+    ["t4","Гипотеза — меньше 50%","Версия или неизвестный человек; проверка впереди."]];
+  const rows=T.nodes.filter(n=>n.l!=="me"&&CONF[n.c]).map(n=>({c:n.c,row:n.row,col:n.col,l:n.l,v:CONF[n.c][0],why:CONF[n.c][1],t:confTier(n.c)}));
+  let h=`<h2>Насколько мы уверены в каждом человеке</h2>
+  <p class="first">Процент — это уверенность во всей цепочке от Александра и Никиты до этого человека, а не только в нём самом. Если человек найден в документах, но звено ниже под вопросом, процент будет ниже. Это экспертная оценка, а не расчёт.</p>`;
+  tiers.forEach(([t,title,desc])=>{
+    const rs=rows.filter(r=>r.t===t).sort((a,b)=>a.row-b.row||a.col-b.col); if(!rs.length) return;
+    h+=`<h3 class="ct ${t}">${title}</h3><p class="cd">${desc}</p><div class="cl">`;
+    rs.forEach(r=>{const b=BIO[r.c]||{t:r.c,y:""};
+      const nx=(typeof CONF_NEXT!=="undefined"&&CONF_NEXT[r.c]&&r.v<90)?`<div class="cn"><b>Что подтвердит:</b> ${CONF_NEXT[r.c]}</div>`:"";
+      h+=`<div class="ci ${t} ${r.l}" data-c="${r.c}"><div class="cv">${r.v?r.v+"%":"?"}</div><div class="cb"><div class="cnm">${b.t} <span>${b.y||""}</span></div><div class="cw">${r.why}</div>${nx}<div class="clin">${LN[r.l]||""}</div></div></div>`;});
+    h+=`</div>`;
+  });
+  box.innerHTML=h;
+  box.addEventListener("click",e=>{const c=e.target.closest(".ci"); if(c) open(c.dataset.c);});
+})();
+
+/* ── ОБНОВЛЕНИЯ ── */
+renderReleases(document.getElementById("releases"));
+
+/* ── адрес ── */
+(function openFromHash(){
+  const h=(location.hash||"").replace("#","");
+  if(!h) return;
+  if(document.getElementById("p-"+h)){ showPane(h); return; }
+  if(document.getElementById("p-book")){ showPane("book"); bookAnchor=h; }
+})();
+</script>

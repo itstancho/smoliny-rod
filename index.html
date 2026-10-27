@@ -170,6 +170,8 @@ body{background:var(--bg);color:var(--ink);
 .toc a{display:block;padding:6px 0 6px 13px;font-size:13.5px;line-height:1.35;
   color:var(--ink);text-decoration:none;border-left:2px solid var(--line);transition:.15s}
 .toc a:hover{color:var(--accent);border-color:var(--accent)}
+.toc .tocg{font-size:11.5px;font-weight:700;color:var(--muted);margin:14px 0 4px 13px}
+.toc .tocg:first-child{margin-top:0}
 .toc a.on{color:var(--accent);border-color:var(--accent);font-weight:600}
 .tier2,.tier3,.tier4{border-radius:14px;padding:14px 18px 6px;margin:18px 0}
 .tier2{background:#f6f3ee;border:1.5px solid #e2dacd;color:#4a443d}
@@ -241,6 +243,12 @@ body{background:var(--bg);color:var(--ink);
 @media(max-width:1080px){
   #p-book.on{grid-template-columns:1fr}
   .toc{position:static}
+  .toc h4{cursor:pointer;margin-bottom:0}
+  .toc h4::after{content:"  ▾ показать"; text-transform:none; letter-spacing:0; font-weight:500; color:var(--accent)}
+  .toc.open h4::after{content:"  ▴ скрыть"}
+  .toc.open h4{margin-bottom:12px}
+  .toc #toc{display:none}
+  .toc.open #toc{display:block}
   .sheet{padding:30px 22px}
 }
 
@@ -464,7 +472,7 @@ body{background:var(--bg);color:var(--ink);
 </section>
 
 <section class="pane" id="p-book">
-  <aside class="toc"><h4>Оглавление</h4><div id="toc"></div></aside>
+  <aside class="toc"><h4 onclick="this.parentNode.classList.toggle('open')">Оглавление</h4><div id="toc"></div></aside>
   <div class="sheet" id="bookbody"></div>
 </section>
 
@@ -739,7 +747,10 @@ Promise.all([fetch("book.html").then(r=>r.text()),fetch("places.html").then(r=>r
   body.innerHTML=t.replace(/<style>[\s\S]*?<\/style>/ig,"")+(pl?'<div class="partsep">Места, откуда наши предки</div>'+pl:"");
   try{highlightYears(body);}catch(e){}
   const toc=document.getElementById("toc");
+  let tocGroup="";
   body.querySelectorAll(":scope > .ch").forEach(ch=>{
+    const g=/^pl\d/.test(ch.id)?"Места и фамилии":"Книга";
+    if(g!==tocGroup){tocGroup=g;const h=document.createElement("div");h.className="tocg";h.textContent=g;toc.appendChild(h);}
     const a=document.createElement("a");
     a.href="#"+ch.id;
     a.textContent=ch.dataset.nav||(ch.querySelector("h2")||{}).textContent||ch.id;
