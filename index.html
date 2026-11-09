@@ -727,7 +727,7 @@ document.addEventListener("click",e=>{
   const t=e.target.closest(".tab");
   if(t){ showPane(t.dataset.p); window.scrollTo(0,0); return; }
   const dr=document.getElementById("dr");
-  if(dr.classList.contains("on")&&!e.target.closest("#dr")) closeDr();
+  if(dr.classList.contains("on")&&e.target.isConnected&&!e.target.closest("#dr")) closeDr();
 });
 
 /* ── подсветка годов в тексте книги ── */
